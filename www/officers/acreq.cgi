@@ -108,6 +108,16 @@ _html do
         if (#{@votelink.to_s.inspect} != '')
           $('#votelink').val(#{@votelink.to_s.inspect});
       });
+      function validateForm(){
+        const votelink = document.getElementById("votelink").value;
+        const comments = document.getElementById("comments").value;
+        if (votelink != '' || comments != '') {
+          return true;
+        } else {
+          alert('Please provide a Vote Link and/or Comments')
+          return false;
+        }
+      }
     }
   end
 
@@ -143,7 +153,7 @@ _html do
         _div.col_md_8 do
           # Display the data input form for an account request
           _whimsy_panel('Request A New Apache Account', style: 'panel-success') do
-            _form.form_horizontal method: 'post' do
+            _form.form_horizontal method: 'post', onsubmit: 'return validateForm()' do
               _div.form_group do
                 _label.control_label.col_sm_2 'User ID', for: "user"
                 _div.col_sm_6 do
@@ -215,8 +225,8 @@ _html do
                 _label.control_label.col_sm_2 'Vote Link', for: "votelink"
                 _div.col_sm_10 do
                   _input.form_control name: "votelink", id: "votelink", type: "text",
-                    pattern: '.*://.*|.*@.*',
-                      placeholder: 'https://lists.apache.org/list.html?project@PROJECT.apache.org'
+                    pattern: 'https://.*\.apache\.org/.+',
+                      placeholder: 'https://lists.apache.org/thread/alphanumerics'
                 end
               end
 
@@ -232,7 +242,9 @@ _html do
                   _input.btn.btn_default type: "submit", value: "Submit"
                 end
                 _div.col_md_9 do
-                  _ 'N.B. The email is copied to root, secretary, project (or operations if none) and the account subject. It includes the comment field.'
+                  _ 'N.B. The email is copied to root, secretary, project (or operations if none) and the account subject.'
+                  _br
+                  _ 'It includes the vote link and the comment field.'
                 end
               end
             end
@@ -256,6 +268,8 @@ _html do
                   _div.bg_danger "No ICLA on record for #{@email}"
                 elsif not iclas[@email] == @name
                   _div.bg_danger "Name #{@name} does not match name on ICLA"
+                elsif @votelink.empty? && @comments.empty?
+                  _div.bg_danger "Please provide a Vote Link and/or Comments"
                 elsif @project.empty?
                   abort = false
                 elsif @project !~ /^[0-9a-z-]+$/
