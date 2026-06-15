@@ -1254,10 +1254,27 @@ module ASF
       ASF.search_one(base, filter, 'cn').flatten
     end
 
+    # LDAP project name overrides
+    def self.ldapname(name)
+      canon = ASF::Committee.to_canonical(name)
+      case canon
+      when 'dataprivacy'
+        'privacy'
+      when 'concom'
+        'conferences'
+      else
+        canon
+      end
+    end
+
     # return project only if it actually exits
     def self.[](name)
-      project = super
+      project = super ldapname(name)
       project.dn ? project : nil
+    end
+
+    def self.find(name)
+      super ldapname(name)
     end
 
     # fetch <tt>dn</tt>, <tt>member</tt>, <tt>modifyTimestamp</tt>, and
